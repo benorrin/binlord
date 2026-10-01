@@ -8,8 +8,27 @@
         <h1>Bin schedules</h1>
         <p>Manage the bins BinLord reminds you about.</p>
     </div>
-    <a asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Export" class="btn btn-outline-secondary">⬇ Export JSON</a>
+        <form asp-action="Import" method="post" enctype="multipart/form-data" class="d-inline m-0">
+            @Html.AntiForgeryToken()
+            <label class="btn btn-outline-secondary mb-0">
+                ⬆ Import JSON
+                <input type="file" name="file" accept="application/json,.json" class="d-none" onchange="this.form.submit()" />
+            </label>
+        </form>
+        <a asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+    </div>
 </div>
+
+@if (TempData["ImportSuccess"] is string importSuccess)
+{
+    <div class="alert alert-success mb-3">@importSuccess</div>
+}
+@if (TempData["ImportError"] is string importError)
+{
+    <div class="alert alert-warning mb-3">@importError</div>
+}
 
 @if (!Model.Any())
 {

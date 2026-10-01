@@ -9,6 +9,10 @@
         <h1>Collection history</h1>
         <p>Mark each past collection as collected or missed to keep a record.</p>
     </div>
+    @if (Model.Any())
+    {
+        <a asp-action="Export" class="btn btn-outline-secondary">⬇ Export CSV</a>
+    }
 </div>
 
 @if (!Model.Any())

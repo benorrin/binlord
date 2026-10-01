@@ -431,6 +431,12 @@ a:hover {
   color: var(--color-primary-dark);
 }
 
+.alert-success {
+  background: var(--color-success-light);
+  border-color: rgba(22, 185, 129, 0.25);
+  color: #0c8a63;
+}
+
 /* ---------------------------------------------------------------- */
 /* Forms                                                               */
 /* ---------------------------------------------------------------- */
