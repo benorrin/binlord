@@ -77,4 +77,24 @@ public class BinSchedule
             yield return FirstCollectionDate.AddDays((lastIndex - i) * intervalDays);
         }
     }
+
+    /// <summary>
+    /// Returns upcoming occurrences on or after <paramref name="today"/>,
+    /// soonest first, up to <paramref name="maxCount"/> of them.
+    /// </summary>
+    public IEnumerable<DateOnly> GetUpcomingOccurrences(DateOnly today, int maxCount)
+    {
+        var intervalDays = FrequencyWeeks * 7;
+        if (intervalDays <= 0)
+        {
+            yield break;
+        }
+
+        var date = GetNextCollectionDate(today);
+        for (var i = 0; i < maxCount; i++)
+        {
+            yield return date;
+            date = date.AddDays(intervalDays);
+        }
+    }
 }
