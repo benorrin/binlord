@@ -1,0 +1,68 @@
+@model List<BinLord.Models.HistoryItemViewModel>
+@using BinLord.Models
+@{
+    ViewData["Title"] = "Collection History";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Collection history</h1>
+        <p>Mark each past collection as collected or missed to keep a record.</p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <span class="empty-icon">📋</span>
+        <h3>No history yet</h3>
+        <p class="mb-0">Once a bin schedule's first collection date has passed, it'll show up here.</p>
+    </div>
+}
+else
+{
+    <div class="table-panel">
+        <div class="history-list">
+            @foreach (var item in Model)
+            {
+                <div class="history-row d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="bin-dot" style="background-color: @item.Colour;"></span>
+                        <div>
+                            <div class="fw-semibold">@item.Name</div>
+                            <div class="text-muted small">@item.CollectionDate.ToString("dddd, d MMM yyyy")</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        @if (item.Status == CollectionStatus.Collected)
+                        {
+                            <span class="badge text-bg-success">Collected</span>
+                        }
+                        else if (item.Status == CollectionStatus.Missed)
+                        {
+                            <span class="badge text-bg-danger">Missed</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-secondary">Not marked</span>
+                        }
+                        <form asp-controller="History" asp-action="Mark" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="binScheduleId" value="@item.BinScheduleId" />
+                            <input type="hidden" name="collectionDate" value="@item.CollectionDate.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="status" value="Collected" />
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Mark collected" disabled="@(item.Status == CollectionStatus.Collected ? "disabled" : null)">✓ Collected</button>
+                        </form>
+                        <form asp-controller="History" asp-action="Mark" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="binScheduleId" value="@item.BinScheduleId" />
+                            <input type="hidden" name="collectionDate" value="@item.CollectionDate.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="status" value="Missed" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Mark missed" disabled="@(item.Status == CollectionStatus.Missed ? "disabled" : null)">✕ Missed</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

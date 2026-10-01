@@ -3,58 +3,94 @@
     ViewData["Title"] = "Next Collections";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="mb-0">🗑️ BinLord</h1>
-    <a asp-controller="BinSchedules" asp-action="Create" class="btn btn-primary">Add a bin schedule</a>
-</div>
-
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
-        No bin schedules yet. <a asp-controller="BinSchedules" asp-action="Create">Add your first one</a> to start getting reminders.
+    <div class="page-header">
+        <div>
+            <h1>Next collections</h1>
+            <p>Keep track of every bin so you never miss collection day.</p>
+        </div>
+    </div>
+
+    <div class="empty-state">
+        <span class="empty-icon">🗑️</span>
+        <h3>No bin schedules yet</h3>
+        <p class="mb-3">Add your first bin to start getting reminders.</p>
+        <a asp-controller="BinSchedules" asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
     </div>
 }
 else
 {
     var soon = Model.Where(m => m.IsSoon).ToList();
+    var nextDate = Model[0].NextCollectionDate;
+    var nextItems = Model.Where(m => m.NextCollectionDate == nextDate).ToList();
+    var next = nextItems[0];
+
+    <div class="hero-card">
+        <div class="hero-eyebrow">Next up</div>
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            <div>
+                <div class="hero-date">@nextDate.ToString("dddd, d MMMM")</div>
+                <div class="hero-sub d-flex flex-wrap align-items-center gap-3">
+                    @foreach (var item in nextItems)
+                    {
+                        <span>
+                            <span class="bin-dot me-1" style="background-color: @item.Colour;"></span>
+                            @item.Name
+                        </span>
+                    }
+                </div>
+            </div>
+            <span class="hero-badge ms-auto">
+                @if (next.IsToday)
+                {
+                    <text>🔥 Collected today</text>
+                }
+                else if (next.IsTomorrow)
+                {
+                    <text>⏰ Collected tomorrow</text>
+                }
+                else
+                {
+                    <text>in @next.DaysUntil days</text>
+                }
+            </span>
+        </div>
+    </div>
 
     @if (soon.Any())
     {
-        <div class="alert alert-warning">
-            <strong>Heads up!</strong>
-            @foreach (var s in soon)
-            {
-                <div>
-                    <span class="bin-dot" style="background-color: @s.Colour;"></span>
-                    <strong>@s.Name</strong> is collected
-                    @if (s.IsToday)
-                    {
-                        <span>today.</span>
-                    }
-                    else
-                    {
-                        <span>tomorrow.</span>
-                    }
-                </div>
-            }
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4">
+            <div>
+                <strong>Heads up &mdash; put these out:</strong>
+                @foreach (var s in soon)
+                {
+                    <div>
+                        <span class="bin-dot me-1" style="background-color: @s.Colour;"></span>
+                        <strong>@s.Name</strong>
+                        @(s.IsToday ? "is collected today." : "is collected tomorrow.")
+                    </div>
+                }
+            </div>
         </div>
     }
+
+    <div class="page-header">
+        <div>
+            <h1>All bins</h1>
+            <p>@Model.Count bin schedule@(Model.Count == 1 ? "" : "s") tracked, sorted by next collection.</p>
+        </div>
+    </div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
         @foreach (var item in Model)
         {
-            var cardClass = item.IsSoon ? "border-warning shadow-sm" : "";
             <div class="col">
-                <div class="card h-100 @cardClass">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="bin-dot me-2" style="background-color: @item.Colour;"></span>
+                <div class="card bin-card h-100 @(item.IsSoon ? "is-soon" : "")">
+                    <span class="bin-card-accent" style="background-color: @item.Colour;"></span>
+                    <div class="card-body ps-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
                             <h5 class="card-title mb-0">@item.Name</h5>
-                        </div>
-                        <p class="card-text mb-1">
-                            <strong>Next collection:</strong> @item.NextCollectionDate.ToString("dddd, d MMMM yyyy")
-                        </p>
-                        <p class="card-text">
                             @if (item.IsToday)
                             {
                                 <span class="badge text-bg-danger">Today!</span>
@@ -67,13 +103,16 @@ else
                             {
                                 <span class="badge text-bg-secondary">In @item.DaysUntil days</span>
                             }
+                        </div>
+                        <p class="card-text mb-1 text-muted">
+                            @item.NextCollectionDate.ToString("dddd, d MMMM yyyy")
                         </p>
                         @if (!string.IsNullOrWhiteSpace(item.Notes))
                         {
-                            <p class="card-text text-muted small">@item.Notes</p>
+                            <p class="card-text text-muted small mb-0">@item.Notes</p>
                         }
                     </div>
-                    <div class="card-footer bg-transparent border-top-0">
+                    <div class="card-footer bg-transparent border-top-0 ps-4 pb-3">
                         <a asp-controller="BinSchedules" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                     </div>
                 </div>

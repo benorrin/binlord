@@ -56,4 +56,25 @@ public class BinSchedule
 
         return candidate;
     }
+
+    /// <summary>
+    /// Returns past expected occurrences on or before <paramref name="today"/>,
+    /// most recent first, up to <paramref name="maxCount"/> of them.
+    /// </summary>
+    public IEnumerable<DateOnly> GetPastOccurrences(DateOnly today, int maxCount)
+    {
+        var intervalDays = FrequencyWeeks * 7;
+        if (intervalDays <= 0 || FirstCollectionDate > today)
+        {
+            yield break;
+        }
+
+        var daysSinceAnchor = today.DayNumber - FirstCollectionDate.DayNumber;
+        var lastIndex = daysSinceAnchor / intervalDays;
+
+        for (var i = 0; i <= lastIndex && i < maxCount; i++)
+        {
+            yield return FirstCollectionDate.AddDays((lastIndex - i) * intervalDays);
+        }
+    }
 }

@@ -1,49 +1,66 @@
 @model BinLord.Models.BinSchedule
 @{
     ViewData["Title"] = "Edit bin schedule";
+    var isPreset = BinLord.Models.BinPresetNames.All.Contains(Model.Name);
 }
 
-<h1>Edit bin schedule</h1>
+<div class="page-header">
+    <div>
+        <h1>Edit bin schedule</h1>
+        <p>Update the details BinLord uses to work out collection day.</p>
+    </div>
+</div>
 
 <div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit">
-            <input type="hidden" asp-for="Id" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Colour" class="form-label"></label>
-                <input asp-for="Colour" type="color" class="form-control form-control-color" />
-                <span asp-validation-for="Colour" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="FirstCollectionDate" class="form-label"></label>
-                <input asp-for="FirstCollectionDate" class="form-control" />
-                <div class="form-text">Any date this bin is (or was) collected on. BinLord works out future dates from this.</div>
-                <span asp-validation-for="FirstCollectionDate" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="FrequencyWeeks" class="form-label"></label>
-                <select asp-for="FrequencyWeeks" class="form-select">
-                    <option value="1">Every week</option>
-                    <option value="2">Every 2 weeks (fortnightly)</option>
-                    <option value="3">Every 3 weeks</option>
-                    <option value="4">Every 4 weeks</option>
-                </select>
-                <span asp-validation-for="FrequencyWeeks" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Notes" class="form-label"></label>
-                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
-                <span asp-validation-for="Notes" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a asp-action="Index" class="btn btn-link">Cancel</a>
-        </form>
+    <div class="col-md-7 col-lg-6">
+        <div class="form-panel">
+            <form asp-action="Edit">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-3">
+                    <label for="namePreset" class="form-label">Bin type</label>
+                    <select id="namePreset" class="form-select mb-2">
+                        <option value="">Choose a bin type&hellip;</option>
+                        @foreach (var preset in BinLord.Models.BinPresetNames.All)
+                        {
+                            <option value="@preset" selected="@(preset == Model.Name ? "selected" : null)">@preset</option>
+                        }
+                        <option value="__custom" selected="@(isPreset ? null : "selected")">Other (custom name)</option>
+                    </select>
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Colour" class="form-label"></label>
+                    <input asp-for="Colour" type="color" class="form-control form-control-color" />
+                    <span asp-validation-for="Colour" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FirstCollectionDate" class="form-label"></label>
+                    <input asp-for="FirstCollectionDate" class="form-control" />
+                    <div class="form-text">Any date this bin is (or was) collected on. BinLord works out future dates from this.</div>
+                    <span asp-validation-for="FirstCollectionDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FrequencyWeeks" class="form-label"></label>
+                    <select asp-for="FrequencyWeeks" class="form-select">
+                        <option value="1">Every week</option>
+                        <option value="2">Every 2 weeks (fortnightly)</option>
+                        <option value="3">Every 3 weeks</option>
+                        <option value="4">Every 4 weeks</option>
+                    </select>
+                    <span asp-validation-for="FrequencyWeeks" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn app-btn-primary">Save changes</button>
+                <a asp-action="Index" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
     </div>
 </div>
 

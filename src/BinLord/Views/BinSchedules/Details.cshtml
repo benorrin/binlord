@@ -5,24 +5,36 @@
     var next = Model.GetNextCollectionDate(today);
 }
 
-<h1>
-    <span class="bin-dot me-1" style="background-color: @Model.Colour;"></span>
-    @Model.Name
-</h1>
+<div class="page-header">
+    <div>
+        <h1>
+            <span class="bin-dot me-2" style="background-color: @Model.Colour;"></span>
+            @Model.Name
+        </h1>
+    </div>
+</div>
 
-<dl class="row">
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FirstCollectionDate)</dt>
-    <dd class="col-sm-9">@Model.FirstCollectionDate.ToString("dddd, d MMM yyyy")</dd>
-    <dt class="col-sm-3">Repeats every</dt>
-    <dd class="col-sm-9">@Model.FrequencyWeeks week@(Model.FrequencyWeeks == 1 ? "" : "s")</dd>
-    <dt class="col-sm-3">Next collection</dt>
-    <dd class="col-sm-9">@next.ToString("dddd, d MMM yyyy")</dd>
-    @if (!string.IsNullOrWhiteSpace(Model.Notes))
-    {
-        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Notes)</dt>
-        <dd class="col-sm-9">@Model.Notes</dd>
-    }
-</dl>
+<div class="row">
+    <div class="col-md-7 col-lg-6">
+        <div class="form-panel">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.FirstCollectionDate)</dt>
+                <dd class="col-sm-8">@Model.FirstCollectionDate.ToString("dddd, d MMM yyyy")</dd>
+                <dt class="col-sm-4">Repeats every</dt>
+                <dd class="col-sm-8">@Model.FrequencyWeeks week@(Model.FrequencyWeeks == 1 ? "" : "s")</dd>
+                <dt class="col-sm-4">Next collection</dt>
+                <dd class="col-sm-8 fw-semibold">@next.ToString("dddd, d MMM yyyy")</dd>
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Notes)</dt>
+                    <dd class="col-sm-8">@Model.Notes</dd>
+                }
+            </dl>
+        </div>
 
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
-<a asp-action="Index" class="btn btn-link">Back to list</a>
+        <div class="mt-3">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn app-btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-link">Back to list</a>
+        </div>
+    </div>
+</div>

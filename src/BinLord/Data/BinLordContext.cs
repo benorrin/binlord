@@ -10,4 +10,13 @@ public class BinLordContext : DbContext
     }
 
     public DbSet<BinSchedule> BinSchedules => Set<BinSchedule>();
+
+    public DbSet<BinCollectionRecord> BinCollectionRecords => Set<BinCollectionRecord>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<BinCollectionRecord>()
+            .HasIndex(r => new { r.BinScheduleId, r.CollectionDate })
+            .IsUnique();
+    }
 }
