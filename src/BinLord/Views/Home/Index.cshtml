@@ -1,4 +1,5 @@
 @model List<BinLord.Models.UpcomingCollectionViewModel>
+@using BinLord.Models
 @{
     ViewData["Title"] = "Next Collections";
 }
@@ -21,7 +22,6 @@
 }
 else
 {
-    var soon = Model.Where(m => m.IsSoon).ToList();
     var nextDate = Model[0].NextCollectionDate;
     var nextItems = Model.Where(m => m.NextCollectionDate == nextDate).ToList();
     var next = nextItems[0];
@@ -58,17 +58,83 @@ else
         </div>
     </div>
 
-    @if (soon.Any())
+    var dueToday = Model.Where(m => m.IsToday).ToList();
+    var dueTomorrow = Model.Where(m => m.IsTomorrow).ToList();
+
+    @if (dueToday.Any())
     {
-        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4">
+        <div class="page-header">
             <div>
-                <strong>Heads up &mdash; put these out:</strong>
-                @foreach (var s in soon)
+                <h2 class="h4 mb-0">Today's actions</h2>
+            </div>
+        </div>
+        <div class="table-panel mb-4">
+            <div class="history-list">
+                @foreach (var item in dueToday)
+                {
+                    <div class="history-row d-flex align-items-center justify-content-between flex-wrap gap-2 @(item.ActionStage == BinActionStage.NeedsBringIn ? "is-urgent" : "")">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="bin-dot" style="background-color: @item.Colour;"></span>
+                            <div class="fw-semibold">@item.Name</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (item.ActionStage == BinActionStage.NeedsPutOut)
+                            {
+                                <span class="badge text-bg-danger">Put it out</span>
+                                <form asp-controller="Home" asp-action="ToggleTakenOut" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn btn-sm app-btn-primary">I've put it out</button>
+                                </form>
+                            }
+                            else if (item.ActionStage == BinActionStage.PutOut)
+                            {
+                                <span class="badge text-bg-secondary">Out for collection</span>
+                                <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Bring it in</button>
+                                </form>
+                            }
+                            else if (item.ActionStage == BinActionStage.NeedsBringIn)
+                            {
+                                <span class="badge text-bg-warning">Bring it in</span>
+                                <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn btn-sm app-btn-primary">I've brought it in</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-success">All done</span>
+                                <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn btn-sm btn-link">Undo</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (dueTomorrow.Any())
+    {
+        <div class="alert alert-info d-flex align-items-start gap-2 mb-4">
+            <div>
+                <strong>Heads up for tomorrow:</strong>
+                @foreach (var s in dueTomorrow)
                 {
                     <div>
                         <span class="bin-dot me-1" style="background-color: @s.Colour;"></span>
-                        <strong>@s.Name</strong>
-                        @(s.IsToday ? "is collected today." : "is collected tomorrow.")
+                        <strong>@s.Name</strong> is collected tomorrow.
                     </div>
                 }
             </div>

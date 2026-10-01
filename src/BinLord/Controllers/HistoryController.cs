@@ -60,7 +60,7 @@ public class HistoryController : Controller
                     Name = schedule.Name,
                     Colour = schedule.Colour,
                     CollectionDate = date,
-                    Status = recordLookup.ContainsKey((schedule.Id, date)) ? status : null,
+                    Status = status,
                 });
             }
         }

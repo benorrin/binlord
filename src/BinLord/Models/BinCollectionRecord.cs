@@ -1,9 +1,10 @@
 namespace BinLord.Models;
 
 /// <summary>
-/// Records whether a specific expected occurrence of a bin schedule was
-/// actually collected or missed. Only marked occurrences have a row here;
-/// an occurrence with no row is treated as not yet marked.
+/// Tracks the state of a specific expected occurrence of a bin schedule:
+/// whether it was actually collected or missed (for history), and whether
+/// the bin has been put out and brought back in (for same-day reminders).
+/// Only occurrences with some action taken have a row here.
 /// </summary>
 public class BinCollectionRecord
 {
@@ -15,5 +16,9 @@ public class BinCollectionRecord
 
     public DateOnly CollectionDate { get; set; }
 
-    public CollectionStatus Status { get; set; }
+    public CollectionStatus? Status { get; set; }
+
+    public DateTime? TakenOutAt { get; set; }
+
+    public DateTime? BroughtInAt { get; set; }
 }
