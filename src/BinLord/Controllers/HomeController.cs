@@ -12,56 +12,21 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly BinLordContext _context;
     private readonly SettingsService _settingsService;
+    private readonly BinStatusService _binStatusService;
 
-    public HomeController(ILogger<HomeController> logger, BinLordContext context, SettingsService settingsService)
+    public HomeController(ILogger<HomeController> logger, BinLordContext context, SettingsService settingsService, BinStatusService binStatusService)
     {
         _logger = logger;
         _context = context;
         _settingsService = settingsService;
+        _binStatusService = binStatusService;
     }
 
     public async Task<IActionResult> Index()
     {
         var settings = await _settingsService.GetAsync();
-        var today = settings.GetToday();
-        var now = settings.GetNow();
-
-        var schedules = await _context.BinSchedules.AsNoTracking().ToListAsync();
-        var todaysRecords = await _context.BinCollectionRecords
-            .AsNoTracking()
-            .Where(r => r.CollectionDate == today)
-            .ToDictionaryAsync(r => r.BinScheduleId);
-
-        var upcoming = schedules
-            .Select(s => new UpcomingCollectionViewModel
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Colour = s.Colour,
-                Notes = s.Notes,
-                NextCollectionDate = s.GetNextCollectionDate(today),
-            })
-            .ToList();
-
-        foreach (var item in upcoming)
-        {
-            item.DaysUntil = item.NextCollectionDate.DayNumber - today.DayNumber;
-
-            if (item.IsToday && todaysRecords.TryGetValue(item.Id, out var record))
-            {
-                item.TakenOutAt = record.TakenOutAt;
-                item.BroughtInAt = record.BroughtInAt;
-            }
-
-            item.ActionStage = item.BroughtInAt is not null
-                ? BinActionStage.Done
-                : item.TakenOutAt is not null
-                    ? (now.Hour >= settings.BringInAfterHour ? BinActionStage.NeedsBringIn : BinActionStage.PutOut)
-                    : BinActionStage.NeedsPutOut;
-        }
-
-        var ordered = upcoming.OrderBy(vm => vm.NextCollectionDate).ToList();
-        return View(ordered);
+        var upcoming = await _binStatusService.GetUpcomingAsync(settings);
+        return View(upcoming);
     }
 
     [HttpPost]

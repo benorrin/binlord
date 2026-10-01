@@ -15,6 +15,10 @@
 {
     <div class="alert alert-success mb-3">@savedMessage</div>
 }
+@if (TempData["SettingsError"] is string errorMessage)
+{
+    <div class="alert alert-warning mb-3">@errorMessage</div>
+}
 
 <div class="row">
     <div class="col-md-8 col-lg-7">
@@ -87,6 +91,111 @@
                     <div class="form-text">How many past dates to show per bin on the History page by default (the CSV export always includes everything).</div>
                     <span asp-validation-for="HistoryOccurrencesPerBin" class="text-danger"></span>
                 </div>
+            </div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-1">Email notifications</h2>
+                <p class="text-muted small mb-3">Sent when a bin needs putting out, and again when it needs bringing in.</p>
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="EmailNotificationsEnabled" class="form-check-input" role="switch" />
+                    <label asp-for="EmailNotificationsEnabled" class="form-check-label"></label>
+                </div>
+                <div class="row g-3 mb-1">
+                    <div class="col-sm-8">
+                        <label asp-for="SmtpHost" class="form-label"></label>
+                        <input asp-for="SmtpHost" class="form-control" placeholder="smtp.example.com" />
+                        <span asp-validation-for="SmtpHost" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-4">
+                        <label asp-for="SmtpPort" class="form-label"></label>
+                        <input asp-for="SmtpPort" type="number" class="form-control" />
+                        <span asp-validation-for="SmtpPort" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="SmtpUseSsl" class="form-check-input" />
+                    <label asp-for="SmtpUseSsl" class="form-check-label"></label>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="SmtpUsername" class="form-label"></label>
+                        <input asp-for="SmtpUsername" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="SmtpUsername" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="SmtpPassword" class="form-label"></label>
+                        <input asp-for="SmtpPassword" type="password" class="form-control" autocomplete="new-password"
+                               placeholder="@(ViewBag.HasSmtpPassword ? "(unchanged — leave blank to keep)" : "")" />
+                        <span asp-validation-for="SmtpPassword" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="EmailFrom" class="form-label"></label>
+                        <input asp-for="EmailFrom" class="form-control" placeholder="binlord@example.com" />
+                        <span asp-validation-for="EmailFrom" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="EmailTo" class="form-label"></label>
+                        <input asp-for="EmailTo" class="form-control" placeholder="you@example.com" />
+                        <span asp-validation-for="EmailTo" class="text-danger"></span>
+                    </div>
+                </div>
+                <button type="submit" formaction="@Url.Action("TestEmail")" class="btn btn-sm btn-outline-secondary">Send test email</button>
+                <span class="text-muted small ms-2">Uses the currently saved settings &mdash; save first if you've just changed them.</span>
+            </div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-1">ntfy notifications</h2>
+                <p class="text-muted small mb-3">
+                    Push notifications via <a href="https://ntfy.sh" target="_blank" rel="noopener">ntfy</a> &mdash;
+                    self-hosted or the public ntfy.sh server.
+                </p>
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="NtfyEnabled" class="form-check-input" role="switch" />
+                    <label asp-for="NtfyEnabled" class="form-check-label"></label>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NtfyServerUrl" class="form-label"></label>
+                    <input asp-for="NtfyServerUrl" class="form-control" />
+                    <span asp-validation-for="NtfyServerUrl" class="text-danger"></span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="NtfyTopic" class="form-label"></label>
+                        <input asp-for="NtfyTopic" class="form-control" placeholder="my-bins-a1b2c3" />
+                        <div class="form-text">Pick something hard to guess if using the public ntfy.sh server &mdash; anyone who knows it can read your notifications.</div>
+                        <span asp-validation-for="NtfyTopic" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="NtfyToken" class="form-label"></label>
+                        <input asp-for="NtfyToken" type="password" class="form-control" autocomplete="new-password" />
+                        <div class="form-text">Only needed for access-controlled topics.</div>
+                        <span asp-validation-for="NtfyToken" class="text-danger"></span>
+                    </div>
+                </div>
+                <button type="submit" formaction="@Url.Action("TestNtfy")" class="btn btn-sm btn-outline-secondary">Send test notification</button>
+                <span class="text-muted small ms-2">Uses the currently saved settings &mdash; save first if you've just changed them.</span>
+            </div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-1">Uptime Kuma / monitoring integration</h2>
+                <p class="text-muted small mb-3">
+                    No credentials needed here &mdash; point a monitor at these URLs and let your existing alerting
+                    handle it.
+                </p>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Health check</dt>
+                    <dd class="col-sm-8"><code>@ViewBag.HealthUrl</code> &mdash; always returns 200 OK while the app is running.</dd>
+                    <dt class="col-sm-4">Bin status</dt>
+                    <dd class="col-sm-8">
+                        <code>@ViewBag.StatusUrl</code> &mdash; returns JSON with <code>"ok":true</code> when nothing
+                        needs doing, or <code>"ok":false</code> when a bin needs putting out or bringing in. In Uptime
+                        Kuma, add an HTTP(s) monitor with a <strong>Keyword</strong> check for <code>"ok":true</code> to
+                        get alerted (via whatever notification channels you've already set up in Kuma) whenever a bin
+                        needs attention.
+                    </dd>
+                </dl>
             </div>
 
             <button type="submit" class="btn app-btn-primary">Save settings</button>

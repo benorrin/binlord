@@ -21,4 +21,10 @@ public class BinCollectionRecord
     public DateTime? TakenOutAt { get; set; }
 
     public DateTime? BroughtInAt { get; set; }
+
+    /// <summary>When a "put it out" reminder notification was last sent for this occurrence, if any.</summary>
+    public DateTime? PutOutReminderSentAt { get; set; }
+
+    /// <summary>When a "bring it in" reminder notification was last sent for this occurrence, if any.</summary>
+    public DateTime? BringInReminderSentAt { get; set; }
 }

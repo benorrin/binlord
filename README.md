@@ -46,6 +46,21 @@ src/BinLord/
   Views/         Razor views
 ```
 
+## Notifications and monitoring
+
+On the Settings page you can configure:
+
+- **Email and/or [ntfy](https://ntfy.sh) notifications**, sent automatically
+  when a bin needs putting out, and again when it needs bringing in (checked
+  every 15 minutes in the background; each reminder is only sent once per
+  occurrence).
+- An **Uptime Kuma** (or any other monitor) integration: `/health` always
+  returns 200 OK, and `/api/status` returns JSON with `"ok":true` when
+  nothing needs doing or `"ok":false` when a bin needs attention. Point an
+  HTTP(s) monitor with a Keyword check for `"ok":true` at it to route alerts
+  through whatever notification channels you've already set up in Kuma,
+  without configuring email/ntfy in BinLord at all.
+
 ## Running behind a reverse proxy
 
 BinLord trusts `X-Forwarded-Proto`/`X-Forwarded-Host`/`X-Forwarded-For`

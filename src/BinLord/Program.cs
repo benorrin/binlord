@@ -11,6 +11,10 @@ builder.Services.AddControllersWithViews(options => options.Filters.Add<AppSetti
 builder.Services.AddDbContext<BinLordContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("BinLordContext")));
 builder.Services.AddScoped<SettingsService>();
+builder.Services.AddScoped<BinStatusService>();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddHostedService<BinReminderBackgroundService>();
 
 var app = builder.Build();
 
