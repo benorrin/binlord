@@ -2,6 +2,7 @@ using System.Text;
 using System.Xml.Linq;
 using BinLord.Data;
 using BinLord.Models;
+using BinLord.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,24 +10,25 @@ namespace BinLord.Controllers;
 
 public class FeedController : Controller
 {
-    private const int OccurrencesPerBin = 6;
-
     private readonly BinLordContext _context;
+    private readonly SettingsService _settingsService;
 
-    public FeedController(BinLordContext context)
+    public FeedController(BinLordContext context, SettingsService settingsService)
     {
         _context = context;
+        _settingsService = settingsService;
     }
 
     [Route("feed.xml")]
     public async Task<IActionResult> Rss()
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var settings = await _settingsService.GetAsync();
+        var today = settings.GetToday();
         var schedules = await _context.BinSchedules.AsNoTracking().OrderBy(s => s.Name).ToListAsync();
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = settings.GetEffectiveBaseUrl($"{Request.Scheme}://{Request.Host}");
 
         var items = schedules
-            .SelectMany(schedule => schedule.GetUpcomingOccurrences(today, OccurrencesPerBin)
+            .SelectMany(schedule => schedule.GetUpcomingOccurrences(today, settings.FeedOccurrencesPerBin)
                 .Select(date => (schedule, date)))
             .OrderBy(x => x.date)
             .ThenBy(x => x.schedule.Name)
@@ -34,9 +36,9 @@ public class FeedController : Controller
 
         var channel = new XElement(
             "channel",
-            new XElement("title", "BinLord — Bin Collection Schedule"),
+            new XElement("title", $"{settings.AppName} — Bin Collection Schedule"),
             new XElement("link", baseUrl + "/"),
-            new XElement("description", "Upcoming bin collections from BinLord."),
+            new XElement("description", $"Upcoming bin collections from {settings.AppName}."),
             new XElement("lastBuildDate", DateTime.UtcNow.ToString("r")),
             items);
 

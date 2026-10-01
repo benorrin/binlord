@@ -46,6 +46,16 @@ src/BinLord/
   Views/         Razor views
 ```
 
+## Running behind a reverse proxy
+
+BinLord trusts `X-Forwarded-Proto`/`X-Forwarded-Host`/`X-Forwarded-For`
+headers from any upstream, so the scheme and host it sees (used in the
+RSS/calendar feed links) reflect your reverse proxy's public address rather
+than Kestrel's internal binding — this assumes BinLord is only reachable
+through that proxy, not exposed directly as well. If your proxy doesn't set
+those headers, or you want feed links to always use a specific domain, set
+a **Base URL override** on the Settings page instead.
+
 ## Database migrations
 
 Migrations are managed with the EF Core CLI tool, installed locally via the

@@ -1,0 +1,95 @@
+@model BinLord.Models.AppSettings
+@{
+    ViewData["Title"] = "Settings";
+    var timeZones = (List<(string Id, string DisplayName)>)ViewBag.TimeZones;
+}
+
+<div class="page-header">
+    <div>
+        <h1>Settings</h1>
+        <p>Configure how @(Model.AppName) behaves.</p>
+    </div>
+</div>
+
+@if (TempData["SettingsSaved"] is string savedMessage)
+{
+    <div class="alert alert-success mb-3">@savedMessage</div>
+}
+
+<div class="row">
+    <div class="col-md-8 col-lg-7">
+        <form asp-action="Index" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-3">General</h2>
+                <div class="mb-3">
+                    <label asp-for="AppName" class="form-label"></label>
+                    <input asp-for="AppName" class="form-control" />
+                    <div class="form-text">Shown in the navigation bar and in the RSS/calendar feed titles.</div>
+                    <span asp-validation-for="AppName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-3">Hosting</h2>
+                <div class="mb-3">
+                    <label asp-for="TimeZoneId" class="form-label"></label>
+                    <select asp-for="TimeZoneId" class="form-select">
+                        @foreach (var zone in timeZones)
+                        {
+                            <option value="@zone.Id" selected="@(zone.Id == Model.TimeZoneId ? "selected" : null)">@zone.DisplayName</option>
+                        }
+                    </select>
+                    <div class="form-text">Used to work out what day "today" is &mdash; important if the server isn't in your local time zone.</div>
+                    <span asp-validation-for="TimeZoneId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="BaseUrl" class="form-label"></label>
+                    <input asp-for="BaseUrl" class="form-control" placeholder="https://bins.example.com" />
+                    <div class="form-text">
+                        Used to build the links in the RSS and calendar feeds. Leave blank to auto-detect from each
+                        request (currently detected as <code>@ViewBag.DetectedBaseUrl</code>). Set this if BinLord
+                        runs behind a reverse proxy that doesn't forward the original host or scheme correctly, or
+                        if you want feed links to always use a specific domain.
+                    </div>
+                    <span asp-validation-for="BaseUrl" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-3">Reminders</h2>
+                <div class="mb-3">
+                    <label asp-for="BringInAfterHour" class="form-label"></label>
+                    <select asp-for="BringInAfterHour" class="form-select">
+                        @for (var hour = 0; hour < 24; hour++)
+                        {
+                            var label = hour == 0 ? "12:00 AM" : hour < 12 ? $"{hour}:00 AM" : hour == 12 ? "12:00 PM" : $"{hour - 12}:00 PM";
+                            <option value="@hour" selected="@(hour == Model.BringInAfterHour ? "selected" : null)">@label</option>
+                        }
+                    </select>
+                    <div class="form-text">After this time, a bin that's out but not yet brought in is highlighted as urgent on the homepage.</div>
+                    <span asp-validation-for="BringInAfterHour" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-panel mb-4">
+                <h2 class="h5 mb-3">Feeds &amp; history</h2>
+                <div class="mb-3">
+                    <label asp-for="FeedOccurrencesPerBin" class="form-label"></label>
+                    <input asp-for="FeedOccurrencesPerBin" type="number" min="1" max="52" class="form-control" />
+                    <div class="form-text">How many upcoming dates to list per bin in the RSS feed (/feed.xml).</div>
+                    <span asp-validation-for="FeedOccurrencesPerBin" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="HistoryOccurrencesPerBin" class="form-label"></label>
+                    <input asp-for="HistoryOccurrencesPerBin" type="number" min="1" max="200" class="form-control" />
+                    <div class="form-text">How many past dates to show per bin on the History page by default (the CSV export always includes everything).</div>
+                    <span asp-validation-for="HistoryOccurrencesPerBin" class="text-danger"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn app-btn-primary">Save settings</button>
+        </form>
+    </div>
+</div>

@@ -3,6 +3,7 @@ using System;
 using BinLord.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BinLord.Migrations
 {
     [DbContext(typeof(BinLordContext))]
-    partial class BinLordContextModelSnapshot : ModelSnapshot
+    [Migration("20261001213047_AddBaseUrlSetting")]
+    partial class AddBaseUrlSetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.31");

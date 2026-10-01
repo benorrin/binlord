@@ -1,6 +1,7 @@
 using System.Text;
 using BinLord.Data;
 using BinLord.Models;
+using BinLord.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,25 +9,27 @@ namespace BinLord.Controllers;
 
 public class HistoryController : Controller
 {
-    private const int MaxOccurrencesPerBin = 12;
-
     private readonly BinLordContext _context;
+    private readonly SettingsService _settingsService;
 
-    public HistoryController(BinLordContext context)
+    public HistoryController(BinLordContext context, SettingsService settingsService)
     {
         _context = context;
+        _settingsService = settingsService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var ordered = await BuildHistoryItemsAsync(MaxOccurrencesPerBin);
+        var settings = await _settingsService.GetAsync();
+        var ordered = await BuildHistoryItemsAsync(settings.HistoryOccurrencesPerBin, settings.GetToday());
         return View(ordered);
     }
 
     // GET: History/Export
     public async Task<IActionResult> Export()
     {
-        var ordered = await BuildHistoryItemsAsync(int.MaxValue);
+        var settings = await _settingsService.GetAsync();
+        var ordered = await BuildHistoryItemsAsync(int.MaxValue, settings.GetToday());
 
         var sb = new StringBuilder();
         sb.AppendLine("Bin Name,Date,Status");
@@ -40,10 +43,8 @@ public class HistoryController : Controller
         return File(bytes, "text/csv", $"binlord-history-{DateTime.Now:yyyy-MM-dd}.csv");
     }
 
-    private async Task<List<HistoryItemViewModel>> BuildHistoryItemsAsync(int maxOccurrencesPerBin)
+    private async Task<List<HistoryItemViewModel>> BuildHistoryItemsAsync(int maxOccurrencesPerBin, DateOnly today)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-
         var schedules = await _context.BinSchedules.AsNoTracking().ToListAsync();
         var records = await _context.BinCollectionRecords.AsNoTracking().ToListAsync();
         var recordLookup = records.ToDictionary(r => (r.BinScheduleId, r.CollectionDate), r => r.Status);

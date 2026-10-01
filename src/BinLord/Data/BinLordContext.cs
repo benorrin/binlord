@@ -13,6 +13,8 @@ public class BinLordContext : DbContext
 
     public DbSet<BinCollectionRecord> BinCollectionRecords => Set<BinCollectionRecord>();
 
+    public DbSet<AppSettings> AppSettings => Set<AppSettings>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BinCollectionRecord>()

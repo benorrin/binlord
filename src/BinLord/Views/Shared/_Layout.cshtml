@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BinLord</title>
-    <link rel="alternate" type="application/rss+xml" title="BinLord — Bin Collection Schedule" href="~/feed.xml" />
+    <title>@ViewData["Title"] - @(ViewBag.AppName ?? "BinLord")</title>
+    <link rel="alternate" type="application/rss+xml" title="@(ViewBag.AppName ?? "BinLord") — Bin Collection Schedule" href="~/feed.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
             <div class="container">
                 <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     <span class="app-brand-icon">🗑️</span>
-                    <span class="app-brand-text">BinLord</span>
+                    <span class="app-brand-text">@(ViewBag.AppName ?? "BinLord")</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,9 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="History" asp-action="Index">History</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
+                        </li>
                     </ul>
                     <a asp-controller="BinSchedules" asp-action="Create" class="btn app-btn-primary app-nav-cta">+ Add bin schedule</a>
                 </div>
@@ -49,7 +52,7 @@
 
     <footer class="app-footer text-muted">
         <div class="container">
-            &copy; 2026 BinLord
+            &copy; 2026 @(ViewBag.AppName ?? "BinLord")
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

@@ -3,6 +3,7 @@ using System;
 using BinLord.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BinLord.Migrations
 {
     [DbContext(typeof(BinLordContext))]
-    partial class BinLordContextModelSnapshot : ModelSnapshot
+    [Migration("20261001212511_AddAppSettings")]
+    partial class AddAppSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.31");
@@ -26,10 +29,6 @@ namespace BinLord.Migrations
                     b.Property<string>("AppName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BaseUrl")
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("BringInAfterHour")

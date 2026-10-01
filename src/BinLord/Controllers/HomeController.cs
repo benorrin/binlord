@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using BinLord.Data;
 using BinLord.Models;
+using BinLord.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,23 +9,22 @@ namespace BinLord.Controllers;
 
 public class HomeController : Controller
 {
-    // After this hour, a bin that's been put out but not brought in is
-    // treated as needing to come back in rather than just "out".
-    private const int BringInAfterHour = 14;
-
     private readonly ILogger<HomeController> _logger;
     private readonly BinLordContext _context;
+    private readonly SettingsService _settingsService;
 
-    public HomeController(ILogger<HomeController> logger, BinLordContext context)
+    public HomeController(ILogger<HomeController> logger, BinLordContext context, SettingsService settingsService)
     {
         _logger = logger;
         _context = context;
+        _settingsService = settingsService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var now = DateTime.Now;
+        var settings = await _settingsService.GetAsync();
+        var today = settings.GetToday();
+        var now = settings.GetNow();
 
         var schedules = await _context.BinSchedules.AsNoTracking().ToListAsync();
         var todaysRecords = await _context.BinCollectionRecords
@@ -56,7 +56,7 @@ public class HomeController : Controller
             item.ActionStage = item.BroughtInAt is not null
                 ? BinActionStage.Done
                 : item.TakenOutAt is not null
-                    ? (now.Hour >= BringInAfterHour ? BinActionStage.NeedsBringIn : BinActionStage.PutOut)
+                    ? (now.Hour >= settings.BringInAfterHour ? BinActionStage.NeedsBringIn : BinActionStage.PutOut)
                     : BinActionStage.NeedsPutOut;
         }
 
@@ -82,6 +82,7 @@ public class HomeController : Controller
 
     private async Task ToggleActionAsync(int binScheduleId, DateOnly collectionDate, bool takenOut)
     {
+        var settings = await _settingsService.GetAsync();
         var record = await _context.BinCollectionRecords
             .FirstOrDefaultAsync(r => r.BinScheduleId == binScheduleId && r.CollectionDate == collectionDate);
 
@@ -90,11 +91,11 @@ public class HomeController : Controller
 
         if (takenOut)
         {
-            record.TakenOutAt = record.TakenOutAt is null ? DateTime.Now : null;
+            record.TakenOutAt = record.TakenOutAt is null ? settings.GetNow() : null;
         }
         else
         {
-            record.BroughtInAt = record.BroughtInAt is null ? DateTime.Now : null;
+            record.BroughtInAt = record.BroughtInAt is null ? settings.GetNow() : null;
         }
 
         if (isNew)
