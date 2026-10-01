@@ -50,10 +50,31 @@ readers and calendar apps — which can't log in — keep working. The
 `/health` and `/api/status` monitoring endpoints are always reachable
 without logging in, regardless of this setting.
 
+## Running with Docker
+
+```bash
+docker compose up -d --build
+```
+
+This builds the image, starts BinLord on `http://localhost:8080`, and
+persists the SQLite database in a named volume (`binlord-data`, mounted at
+`/data`) so it survives rebuilds and `docker compose down`. Migrations run
+automatically on startup, same as running it directly.
+
+To use a different host port, set `BINLORD_PORT` (e.g. `BINLORD_PORT=9000
+docker compose up -d`), or set `TZ` (e.g. `TZ=Europe/London`) for container
+log timestamps — the app's own notion of "today" comes from the Time zone
+setting on the Settings page, not this.
+
+All other configuration (app name, time zone, notifications, access control,
+etc.) is done through the Settings page once it's running, not through
+environment variables.
+
 ## Project structure
 
 ```
 BinLord.sln
+Dockerfile, docker-compose.yml
 src/BinLord/
   Controllers/   MVC controllers (Home, BinSchedules)
   Models/        BinSchedule entity and view models

@@ -1,0 +1,15 @@
+services:
+  binlord:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${BINLORD_PORT:-8080}:8080"
+    volumes:
+      - binlord-data:/data
+    environment:
+      - TZ=${TZ:-Etc/UTC}
+    restart: unless-stopped
+
+volumes:
+  binlord-data:

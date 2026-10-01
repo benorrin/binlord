@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+.git/
+.github/
+.config/
+README.md
+LICENSE
+docker-compose*.yml
+Dockerfile
+.dockerignore
