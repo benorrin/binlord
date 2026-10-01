@@ -1,0 +1,28 @@
+@model BinLord.Models.BinSchedule
+@{
+    ViewData["Title"] = "Bin schedule details";
+    var today = DateOnly.FromDateTime(DateTime.Today);
+    var next = Model.GetNextCollectionDate(today);
+}
+
+<h1>
+    <span class="bin-dot me-1" style="background-color: @Model.Colour;"></span>
+    @Model.Name
+</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FirstCollectionDate)</dt>
+    <dd class="col-sm-9">@Model.FirstCollectionDate.ToString("dddd, d MMM yyyy")</dd>
+    <dt class="col-sm-3">Repeats every</dt>
+    <dd class="col-sm-9">@Model.FrequencyWeeks week@(Model.FrequencyWeeks == 1 ? "" : "s")</dd>
+    <dt class="col-sm-3">Next collection</dt>
+    <dd class="col-sm-9">@next.ToString("dddd, d MMM yyyy")</dd>
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Notes)</dt>
+        <dd class="col-sm-9">@Model.Notes</dd>
+    }
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+<a asp-action="Index" class="btn btn-link">Back to list</a>

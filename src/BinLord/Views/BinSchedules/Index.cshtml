@@ -1,0 +1,45 @@
+@model List<BinLord.Models.BinSchedule>
+@{
+    ViewData["Title"] = "Bin Schedules";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Bin Schedules</h1>
+    <a asp-action="Create" class="btn btn-primary">Add a bin schedule</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No bin schedules yet. <a asp-action="Create">Add one</a> to get started.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Html.DisplayNameFor(m => m.First().Name)</th>
+                <th>@Html.DisplayNameFor(m => m.First().FirstCollectionDate)</th>
+                <th>Repeats every</th>
+                <th>@Html.DisplayNameFor(m => m.First().Notes)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><span class="bin-dot" style="background-color: @item.Colour;"></span></td>
+                    <td>@item.Name</td>
+                    <td>@item.FirstCollectionDate.ToString("d MMM yyyy")</td>
+                    <td>@item.FrequencyWeeks week@(item.FrequencyWeeks == 1 ? "" : "s")</td>
+                    <td>@item.Notes</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

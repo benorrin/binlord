@@ -1,0 +1,83 @@
+@model List<BinLord.Models.UpcomingCollectionViewModel>
+@{
+    ViewData["Title"] = "Next Collections";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">🗑️ BinLord</h1>
+    <a asp-controller="BinSchedules" asp-action="Create" class="btn btn-primary">Add a bin schedule</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No bin schedules yet. <a asp-controller="BinSchedules" asp-action="Create">Add your first one</a> to start getting reminders.
+    </div>
+}
+else
+{
+    var soon = Model.Where(m => m.IsSoon).ToList();
+
+    @if (soon.Any())
+    {
+        <div class="alert alert-warning">
+            <strong>Heads up!</strong>
+            @foreach (var s in soon)
+            {
+                <div>
+                    <span class="bin-dot" style="background-color: @s.Colour;"></span>
+                    <strong>@s.Name</strong> is collected
+                    @if (s.IsToday)
+                    {
+                        <span>today.</span>
+                    }
+                    else
+                    {
+                        <span>tomorrow.</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        @foreach (var item in Model)
+        {
+            var cardClass = item.IsSoon ? "border-warning shadow-sm" : "";
+            <div class="col">
+                <div class="card h-100 @cardClass">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="bin-dot me-2" style="background-color: @item.Colour;"></span>
+                            <h5 class="card-title mb-0">@item.Name</h5>
+                        </div>
+                        <p class="card-text mb-1">
+                            <strong>Next collection:</strong> @item.NextCollectionDate.ToString("dddd, d MMMM yyyy")
+                        </p>
+                        <p class="card-text">
+                            @if (item.IsToday)
+                            {
+                                <span class="badge text-bg-danger">Today!</span>
+                            }
+                            else if (item.IsTomorrow)
+                            {
+                                <span class="badge text-bg-warning">Tomorrow</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">In @item.DaysUntil days</span>
+                            }
+                        </p>
+                        @if (!string.IsNullOrWhiteSpace(item.Notes))
+                        {
+                            <p class="card-text text-muted small">@item.Notes</p>
+                        }
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a asp-controller="BinSchedules" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
