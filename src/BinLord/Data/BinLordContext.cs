@@ -15,10 +15,16 @@ public class BinLordContext : DbContext
 
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
 
+    public DbSet<User> Users => Set<User>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BinCollectionRecord>()
             .HasIndex(r => new { r.BinScheduleId, r.CollectionDate })
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
             .IsUnique();
     }
 }

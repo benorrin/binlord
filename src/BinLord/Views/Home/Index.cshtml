@@ -2,6 +2,7 @@
 @using BinLord.Models
 @{
     ViewData["Title"] = "Next Collections";
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Editor");
 }
 
 @if (!Model.Any())
@@ -16,8 +17,11 @@
     <div class="empty-state">
         <span class="empty-icon">🗑️</span>
         <h3>No bin schedules yet</h3>
-        <p class="mb-3">Add your first bin to start getting reminders.</p>
-        <a asp-controller="BinSchedules" asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+        @if (canManage)
+        {
+            <p class="mb-3">Add your first bin to start getting reminders.</p>
+            <a asp-controller="BinSchedules" asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+        }
     </div>
 }
 else
@@ -81,42 +85,54 @@ else
                             @if (item.ActionStage == BinActionStage.NeedsPutOut)
                             {
                                 <span class="badge text-bg-danger">Put it out</span>
-                                <form asp-controller="Home" asp-action="ToggleTakenOut" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
-                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" class="btn btn-sm app-btn-primary">I've put it out</button>
-                                </form>
+                                @if (canManage)
+                                {
+                                    <form asp-controller="Home" asp-action="ToggleTakenOut" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                        <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                        <button type="submit" class="btn btn-sm app-btn-primary">I've put it out</button>
+                                    </form>
+                                }
                             }
                             else if (item.ActionStage == BinActionStage.PutOut)
                             {
                                 <span class="badge text-bg-secondary">Out for collection</span>
-                                <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
-                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Bring it in</button>
-                                </form>
+                                @if (canManage)
+                                {
+                                    <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                        <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Bring it in</button>
+                                    </form>
+                                }
                             }
                             else if (item.ActionStage == BinActionStage.NeedsBringIn)
                             {
                                 <span class="badge text-bg-warning">Bring it in</span>
-                                <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
-                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" class="btn btn-sm app-btn-primary">I've brought it in</button>
-                                </form>
+                                @if (canManage)
+                                {
+                                    <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                        <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                        <button type="submit" class="btn btn-sm app-btn-primary">I've brought it in</button>
+                                    </form>
+                                }
                             }
                             else
                             {
                                 <span class="badge text-bg-success">All done</span>
-                                <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="binScheduleId" value="@item.Id" />
-                                    <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" class="btn btn-sm btn-link">Undo</button>
-                                </form>
+                                @if (canManage)
+                                {
+                                    <form asp-controller="Home" asp-action="ToggleBroughtIn" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="binScheduleId" value="@item.Id" />
+                                        <input type="hidden" name="collectionDate" value="@item.NextCollectionDate.ToString("yyyy-MM-dd")" />
+                                        <button type="submit" class="btn btn-sm btn-link">Undo</button>
+                                    </form>
+                                }
                             }
                         </div>
                     </div>
@@ -178,9 +194,12 @@ else
                             <p class="card-text text-muted small mb-0">@item.Notes</p>
                         }
                     </div>
-                    <div class="card-footer bg-transparent border-top-0 ps-4 pb-3">
-                        <a asp-controller="BinSchedules" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    </div>
+                    @if (canManage)
+                    {
+                        <div class="card-footer bg-transparent border-top-0 ps-4 pb-3">
+                            <a asp-controller="BinSchedules" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        </div>
+                    }
                 </div>
             </div>
         }

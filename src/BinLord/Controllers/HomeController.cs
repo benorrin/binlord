@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using BinLord.Data;
+using BinLord.Infrastructure;
 using BinLord.Models;
 using BinLord.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +24,8 @@ public class HomeController : Controller
         _binStatusService = binStatusService;
     }
 
+    [AllowAnonymous]
+    [TypeFilter(typeof(ViewingAccessFilter))]
     public async Task<IActionResult> Index()
     {
         var settings = await _settingsService.GetAsync();
@@ -29,6 +33,7 @@ public class HomeController : Controller
         return View(upcoming);
     }
 
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleTakenOut(int binScheduleId, DateOnly collectionDate)
@@ -37,6 +42,7 @@ public class HomeController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleBroughtIn(int binScheduleId, DateOnly collectionDate)
@@ -71,6 +77,7 @@ public class HomeController : Controller
         await _context.SaveChangesAsync();
     }
 
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

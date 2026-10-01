@@ -1,10 +1,13 @@
+using System.Security.Cryptography;
 using BinLord.Data;
 using BinLord.Models;
 using BinLord.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BinLord.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class SettingsController : Controller
 {
     private readonly BinLordContext _context;
@@ -97,6 +100,8 @@ public class SettingsController : Controller
         settings.NtfyTopic = string.IsNullOrWhiteSpace(model.NtfyTopic) ? null : model.NtfyTopic.Trim();
         settings.NtfyToken = string.IsNullOrWhiteSpace(model.NtfyToken) ? null : model.NtfyToken.Trim();
 
+        settings.SchedulesPubliclyVisible = model.SchedulesPubliclyVisible;
+
         await _context.SaveChangesAsync();
 
         TempData["SettingsSaved"] = "Settings saved.";
@@ -125,6 +130,17 @@ public class SettingsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegenerateFeedToken()
+    {
+        var settings = await _settingsService.GetAsync();
+        settings.FeedAccessToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant();
+        await _context.SaveChangesAsync();
+        TempData["SettingsSaved"] = "Feed access token regenerated — update any existing feed/calendar subscriptions with the new link.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> TestNtfy()
     {
         var settings = await _settingsService.GetAsync();
@@ -145,11 +161,14 @@ public class SettingsController : Controller
 
     private void PopulateViewBag(AppSettings settings)
     {
+        var baseUrl = settings.GetEffectiveBaseUrl($"{Request.Scheme}://{Request.Host}");
+
         ViewBag.TimeZones = GetTimeZoneSelectItems(settings.TimeZoneId);
         ViewBag.DetectedBaseUrl = $"{Request.Scheme}://{Request.Host}";
         ViewBag.HasSmtpPassword = !string.IsNullOrEmpty(settings.SmtpPassword);
-        ViewBag.StatusUrl = settings.GetEffectiveBaseUrl($"{Request.Scheme}://{Request.Host}") + "/api/status";
-        ViewBag.HealthUrl = settings.GetEffectiveBaseUrl($"{Request.Scheme}://{Request.Host}") + "/health";
+        ViewBag.StatusUrl = baseUrl + "/api/status";
+        ViewBag.HealthUrl = baseUrl + "/health";
+        // ViewBag.RssUrl / IcsUrl are already populated by AppSettingsFilter.
     }
 
     private static bool TimeZoneIdIsValid(string timeZoneId)

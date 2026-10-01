@@ -2,12 +2,15 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using BinLord.Data;
+using BinLord.Infrastructure;
 using BinLord.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BinLord.Controllers;
 
+[Authorize(Roles = "Admin,Editor")]
 public class BinSchedulesController : Controller
 {
     private readonly BinLordContext _context;
@@ -18,6 +21,8 @@ public class BinSchedulesController : Controller
     }
 
     // GET: BinSchedules
+    [AllowAnonymous]
+    [TypeFilter(typeof(ViewingAccessFilter))]
     public async Task<IActionResult> Index()
     {
         var schedules = await _context.BinSchedules
@@ -28,6 +33,8 @@ public class BinSchedulesController : Controller
     }
 
     // GET: BinSchedules/Details/5
+    [AllowAnonymous]
+    [TypeFilter(typeof(ViewingAccessFilter))]
     public async Task<IActionResult> Details(int? id)
     {
         if (id is null)

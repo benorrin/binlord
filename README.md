@@ -32,7 +32,23 @@ dotnet run
 
 The database (SQLite) is created and migrated automatically on first run.
 Once started, open the URL printed in the console (e.g.
-`http://localhost:5236`).
+`http://localhost:5236`) — the first visit walks you through creating an
+admin account.
+
+## Accounts and permissions
+
+- **Admin**: everything, including Settings and managing users.
+- **Editor**: can view and modify bin schedules and history, but not Settings or users.
+- **Viewer**: can only view.
+
+There's no self-service registration — admins create accounts on the Users
+page. On the Settings page, **Schedules are publicly visible** controls
+whether anyone can view the homepage/schedules/history without logging in
+(viewing only; changes always require an Editor or Admin account). When
+turned off, the RSS and calendar feed links gain an access token so feed
+readers and calendar apps — which can't log in — keep working. The
+`/health` and `/api/status` monitoring endpoints are always reachable
+without logging in, regardless of this setting.
 
 ## Project structure
 

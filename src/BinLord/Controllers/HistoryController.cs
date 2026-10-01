@@ -1,7 +1,9 @@
 using System.Text;
 using BinLord.Data;
+using BinLord.Infrastructure;
 using BinLord.Models;
 using BinLord.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +20,8 @@ public class HistoryController : Controller
         _settingsService = settingsService;
     }
 
+    [AllowAnonymous]
+    [TypeFilter(typeof(ViewingAccessFilter))]
     public async Task<IActionResult> Index()
     {
         var settings = await _settingsService.GetAsync();
@@ -26,6 +30,8 @@ public class HistoryController : Controller
     }
 
     // GET: History/Export
+    [AllowAnonymous]
+    [TypeFilter(typeof(ViewingAccessFilter))]
     public async Task<IActionResult> Export()
     {
         var settings = await _settingsService.GetAsync();
@@ -79,6 +85,7 @@ public class HistoryController : Controller
             : value;
     }
 
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Mark(int binScheduleId, DateOnly collectionDate, CollectionStatus status)

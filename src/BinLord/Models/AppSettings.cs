@@ -85,6 +85,17 @@ public class AppSettings
     [Display(Name = "ntfy access token (optional)")]
     public string? NtfyToken { get; set; }
 
+    [Display(Name = "Schedules are publicly visible")]
+    public bool SchedulesPubliclyVisible { get; set; } = true;
+
+    /// <summary>
+    /// Lets the RSS/calendar feeds stay usable when schedules aren't public:
+    /// append <c>?token=...</c> to bypass the login requirement, since feed
+    /// readers and calendar apps can't do interactive logins.
+    /// </summary>
+    [StringLength(100)]
+    public string? FeedAccessToken { get; set; }
+
     /// <summary>
     /// The base URL to use for absolute links (RSS/calendar feeds): the
     /// configured override if set, otherwise whatever was detected from
@@ -94,5 +105,19 @@ public class AppSettings
     public string GetEffectiveBaseUrl(string detectedBaseUrl)
     {
         return string.IsNullOrWhiteSpace(BaseUrl) ? detectedBaseUrl : BaseUrl.TrimEnd('/');
+    }
+
+    /// <summary>
+    /// Whether an anonymous request should be let through: either schedules
+    /// are public, or it supplied a valid feed access token.
+    /// </summary>
+    public bool AllowsAnonymousFeedAccess(string? suppliedToken)
+    {
+        if (SchedulesPubliclyVisible)
+        {
+            return true;
+        }
+
+        return !string.IsNullOrEmpty(FeedAccessToken) && suppliedToken == FeedAccessToken;
     }
 }

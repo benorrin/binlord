@@ -1,11 +1,13 @@
 using System.Text;
 using BinLord.Data;
 using BinLord.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BinLord.Controllers;
 
+[AllowAnonymous]
 public class CalendarController : Controller
 {
     private readonly BinLordContext _context;
@@ -18,9 +20,14 @@ public class CalendarController : Controller
     }
 
     [Route("calendar.ics")]
-    public async Task<IActionResult> Ics()
+    public async Task<IActionResult> Ics(string? token)
     {
         var settings = await _settingsService.GetAsync();
+        if (!User.Identity!.IsAuthenticated && !settings.AllowsAnonymousFeedAccess(token))
+        {
+            return Unauthorized();
+        }
+
         var schedules = await _context.BinSchedules.AsNoTracking().OrderBy(s => s.Name).ToListAsync();
         var baseUrl = settings.GetEffectiveBaseUrl($"{Request.Scheme}://{Request.Host}");
         var dtStamp = DateTime.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'");

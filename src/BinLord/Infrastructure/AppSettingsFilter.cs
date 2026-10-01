@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace BinLord.Infrastructure;
 
 /// <summary>
-/// Loads the configured app name into ViewBag before every action, so
-/// layouts and views can show it without each controller fetching it.
+/// Loads settings-derived display info into ViewBag before every action,
+/// so layouts and views can show it without each controller fetching it.
 /// </summary>
 public class AppSettingsFilter : IAsyncActionFilter
 {
@@ -23,6 +23,14 @@ public class AppSettingsFilter : IAsyncActionFilter
         {
             var settings = await _settingsService.GetAsync();
             controller.ViewBag.AppName = settings.AppName;
+            controller.ViewBag.SchedulesPubliclyVisible = settings.SchedulesPubliclyVisible;
+
+            var baseUrl = settings.GetEffectiveBaseUrl($"{context.HttpContext.Request.Scheme}://{context.HttpContext.Request.Host}");
+            var tokenSuffix = settings.SchedulesPubliclyVisible || string.IsNullOrEmpty(settings.FeedAccessToken)
+                ? string.Empty
+                : $"?token={settings.FeedAccessToken}";
+            controller.ViewBag.RssUrl = baseUrl + "/feed.xml" + tokenSuffix;
+            controller.ViewBag.IcsUrl = baseUrl + "/calendar.ics" + tokenSuffix;
         }
 
         await next();

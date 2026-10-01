@@ -2,6 +2,7 @@
 @using BinLord.Models
 @{
     ViewData["Title"] = "Collection History";
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Editor");
 }
 
 <div class="page-header">
@@ -50,20 +51,23 @@ else
                         {
                             <span class="badge text-bg-secondary">Not marked</span>
                         }
-                        <form asp-controller="History" asp-action="Mark" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="binScheduleId" value="@item.BinScheduleId" />
-                            <input type="hidden" name="collectionDate" value="@item.CollectionDate.ToString("yyyy-MM-dd")" />
-                            <input type="hidden" name="status" value="Collected" />
-                            <button type="submit" class="btn btn-sm btn-outline-success" title="Mark collected" disabled="@(item.Status == CollectionStatus.Collected ? "disabled" : null)">✓ Collected</button>
-                        </form>
-                        <form asp-controller="History" asp-action="Mark" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="binScheduleId" value="@item.BinScheduleId" />
-                            <input type="hidden" name="collectionDate" value="@item.CollectionDate.ToString("yyyy-MM-dd")" />
-                            <input type="hidden" name="status" value="Missed" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Mark missed" disabled="@(item.Status == CollectionStatus.Missed ? "disabled" : null)">✕ Missed</button>
-                        </form>
+                        @if (canManage)
+                        {
+                            <form asp-controller="History" asp-action="Mark" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="binScheduleId" value="@item.BinScheduleId" />
+                                <input type="hidden" name="collectionDate" value="@item.CollectionDate.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="status" value="Collected" />
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Mark collected" disabled="@(item.Status == CollectionStatus.Collected ? "disabled" : null)">✓ Collected</button>
+                            </form>
+                            <form asp-controller="History" asp-action="Mark" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="binScheduleId" value="@item.BinScheduleId" />
+                                <input type="hidden" name="collectionDate" value="@item.CollectionDate.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="status" value="Missed" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Mark missed" disabled="@(item.Status == CollectionStatus.Missed ? "disabled" : null)">✕ Missed</button>
+                            </form>
+                        }
                     </div>
                 </div>
             }

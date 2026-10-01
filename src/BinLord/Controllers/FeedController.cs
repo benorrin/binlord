@@ -3,11 +3,13 @@ using System.Xml.Linq;
 using BinLord.Data;
 using BinLord.Models;
 using BinLord.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BinLord.Controllers;
 
+[AllowAnonymous]
 public class FeedController : Controller
 {
     private readonly BinLordContext _context;
@@ -20,9 +22,14 @@ public class FeedController : Controller
     }
 
     [Route("feed.xml")]
-    public async Task<IActionResult> Rss()
+    public async Task<IActionResult> Rss(string? token)
     {
         var settings = await _settingsService.GetAsync();
+        if (!User.Identity!.IsAuthenticated && !settings.AllowsAnonymousFeedAccess(token))
+        {
+            return Unauthorized();
+        }
+
         var today = settings.GetToday();
         var schedules = await _context.BinSchedules.AsNoTracking().OrderBy(s => s.Name).ToListAsync();
         var baseUrl = settings.GetEffectiveBaseUrl($"{Request.Scheme}://{Request.Host}");

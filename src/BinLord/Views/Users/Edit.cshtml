@@ -1,0 +1,46 @@
+@model BinLord.Models.EditUserViewModel
+@{
+    ViewData["Title"] = "Edit user";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Edit user</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-panel">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label"></label>
+                    <select asp-for="Role" class="form-select">
+                        <option value="@BinLord.Models.UserRole.Viewer">Viewer &mdash; can view schedules and history</option>
+                        <option value="@BinLord.Models.UserRole.Editor">Editor &mdash; can also add/edit/delete schedules and mark collections</option>
+                        <option value="@BinLord.Models.UserRole.Admin">Admin &mdash; can also change settings and manage users</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="NewPassword" class="form-label"></label>
+                    <input asp-for="NewPassword" class="form-control" placeholder="Leave blank to keep the current password" />
+                    <span asp-validation-for="NewPassword" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn app-btn-primary">Save changes</button>
+                <a asp-action="Index" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

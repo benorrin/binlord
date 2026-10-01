@@ -29,17 +29,52 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="BinSchedules" asp-action="Index">Bin Schedules</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="History" asp-action="Index">History</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
-                        </li>
+                        @if (User.Identity!.IsAuthenticated || ViewBag.SchedulesPubliclyVisible == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="BinSchedules" asp-action="Index">Bin Schedules</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="History" asp-action="Index">History</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">Users</a>
+                            </li>
+                        }
                     </ul>
-                    <a asp-controller="BinSchedules" asp-action="Create" class="btn app-btn-primary app-nav-cta">+ Add bin schedule</a>
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        {
+                            <a asp-controller="BinSchedules" asp-action="Create" class="btn app-btn-primary app-nav-cta">+ Add bin schedule</a>
+                        }
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @User.Identity!.Name
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">Change password</a></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">Log out</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary">Log in</a>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>

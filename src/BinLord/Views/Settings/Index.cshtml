@@ -62,6 +62,32 @@
             </div>
 
             <div class="form-panel mb-4">
+                <h2 class="h5 mb-1">Access control</h2>
+                <p class="text-muted small mb-3">
+                    Manage who can log in and what they can do on the <a asp-controller="Users" asp-action="Index">Users page</a>.
+                </p>
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="SchedulesPubliclyVisible" class="form-check-input" role="switch" />
+                    <label asp-for="SchedulesPubliclyVisible" class="form-check-label"></label>
+                </div>
+                <div class="form-text mb-3">
+                    When on, anyone can view the homepage, bin schedules, and history without logging in (viewing
+                    only &mdash; making changes always requires an Editor or Admin account). When off, all of that
+                    requires logging in.
+                </div>
+                @if (!Model.SchedulesPubliclyVisible)
+                {
+                    <div class="form-text">
+                        Since schedules aren't public, the RSS and calendar feed links below include an access
+                        token so feed readers and calendar apps (which can't log in) can still subscribe.
+                        <div class="mt-1"><code>@ViewBag.RssUrl</code></div>
+                        <div class="mt-1"><code>@ViewBag.IcsUrl</code></div>
+                    </div>
+                    <button type="submit" formaction="@Url.Action("RegenerateFeedToken")" class="btn btn-sm btn-outline-secondary mt-2">Regenerate feed token</button>
+                }
+            </div>
+
+            <div class="form-panel mb-4">
                 <h2 class="h5 mb-3">Reminders</h2>
                 <div class="mb-3">
                     <label asp-for="BringInAfterHour" class="form-label"></label>
@@ -196,6 +222,10 @@
                         needs attention.
                     </dd>
                 </dl>
+                <p class="text-muted small mb-0 mt-2">
+                    These two URLs are always reachable without logging in, even when schedules aren't public, since
+                    monitoring tools can't do interactive logins. The status endpoint includes bin names.
+                </p>
             </div>
 
             <button type="submit" class="btn app-btn-primary">Save settings</button>

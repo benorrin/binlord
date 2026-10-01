@@ -1,6 +1,7 @@
 @model List<BinLord.Models.BinSchedule>
 @{
     ViewData["Title"] = "Bin Schedules";
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Editor");
 }
 
 <div class="page-header">
@@ -9,17 +10,20 @@
         <p>Manage the bins BinLord reminds you about.</p>
     </div>
     <div class="d-flex flex-wrap gap-2">
-        <a href="~/feed.xml" class="btn btn-outline-secondary" title="Subscribe in a feed reader">📡 RSS Feed</a>
-        <a href="~/calendar.ics" class="btn btn-outline-secondary" title="Subscribe in Google/Apple/Outlook calendar">📅 Calendar (ICS)</a>
-        <a asp-action="Export" class="btn btn-outline-secondary">⬇ Export JSON</a>
-        <form asp-action="Import" method="post" enctype="multipart/form-data" class="d-inline m-0">
-            @Html.AntiForgeryToken()
-            <label class="btn btn-outline-secondary mb-0">
-                ⬆ Import JSON
-                <input type="file" name="file" accept="application/json,.json" class="d-none" onchange="this.form.submit()" />
-            </label>
-        </form>
-        <a asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+        <a href="@ViewBag.RssUrl" class="btn btn-outline-secondary" title="Subscribe in a feed reader">📡 RSS Feed</a>
+        <a href="@ViewBag.IcsUrl" class="btn btn-outline-secondary" title="Subscribe in Google/Apple/Outlook calendar">📅 Calendar (ICS)</a>
+        @if (canManage)
+        {
+            <a asp-action="Export" class="btn btn-outline-secondary">⬇ Export JSON</a>
+            <form asp-action="Import" method="post" enctype="multipart/form-data" class="d-inline m-0">
+                @Html.AntiForgeryToken()
+                <label class="btn btn-outline-secondary mb-0">
+                    ⬆ Import JSON
+                    <input type="file" name="file" accept="application/json,.json" class="d-none" onchange="this.form.submit()" />
+                </label>
+            </form>
+            <a asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+        }
     </div>
 </div>
 
@@ -41,8 +45,11 @@
     <div class="empty-state">
         <span class="empty-icon">🗑️</span>
         <h3>No bin schedules yet</h3>
-        <p class="mb-3">Add one to get started.</p>
-        <a asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+        @if (canManage)
+        {
+            <p class="mb-3">Add one to get started.</p>
+            <a asp-action="Create" class="btn app-btn-primary">+ Add a bin schedule</a>
+        }
     </div>
 }
 else
@@ -56,7 +63,10 @@ else
                     <th>@Html.DisplayNameFor(m => m.First().FirstCollectionDate)</th>
                     <th>Repeats every</th>
                     <th>@Html.DisplayNameFor(m => m.First().Notes)</th>
-                    <th></th>
+                    @if (canManage)
+                    {
+                        <th></th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -68,10 +78,13 @@ else
                         <td class="text-muted">@item.FirstCollectionDate.ToString("d MMM yyyy")</td>
                         <td><span class="freq-chip">every @item.FrequencyWeeks week@(item.FrequencyWeeks == 1 ? "" : "s")</span></td>
                         <td class="text-muted">@item.Notes</td>
-                        <td class="text-end">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                        </td>
+                        @if (canManage)
+                        {
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>

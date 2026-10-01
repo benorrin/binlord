@@ -1,6 +1,8 @@
 using BinLord.Data;
 using BinLord.Infrastructure;
 using BinLord.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +14,29 @@ builder.Services.AddDbContext<BinLordContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("BinLordContext")));
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<BinStatusService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHostedService<BinReminderBackgroundService>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.SlidingExpiration = true;
+    });
+
+// Secure by default: every action requires a logged-in user unless marked
+// [AllowAnonymous] (viewing actions additionally re-check the "schedules
+// are publicly visible" setting via ViewingAccessFilter).
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 
@@ -51,6 +73,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

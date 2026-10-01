@@ -1,0 +1,29 @@
+@model BinLord.Models.User
+@{
+    ViewData["Title"] = "Delete user";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Delete user</h1>
+        <p class="text-danger fw-semibold">This can't be undone.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-panel">
+            <dl class="row mb-4">
+                <dt class="col-sm-4">Username</dt>
+                <dd class="col-sm-8">@Model.Username</dd>
+                <dt class="col-sm-4">Role</dt>
+                <dd class="col-sm-8">@Model.Role</dd>
+            </dl>
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">Delete user</button>
+                <a asp-action="Index" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
